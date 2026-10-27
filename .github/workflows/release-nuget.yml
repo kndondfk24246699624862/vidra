@@ -17,8 +17,8 @@ on:
     inputs:
       push:
         description: "Publish merged packages to nuget.org (otherwise dry-run only)"
-        type: 
-        default: true
+        type: boolean
+        default: false
 
 jobs:
   # Publishing is irreversible — nuget.org does not allow re-uploading a version
@@ -26,35 +26,33 @@ jobs:
   # Without this gate a red commit could be published straight to nuget.org.
   verify:
     name: Verify before release
-    uses: ./.github/workflows/ci_online.yml
+    uses: ./.github/workflows/ci.yml
 
   pack:
     name: Pack (${{ matrix.os }})
     needs: verify
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
-          - os: windows-lastest
-          - iod: windows-latest
+          - os: macos-latest
             maui-workload: maui
             artifact: nupkgs-macos
           - os: windows-latest
             maui-workload: maui
             artifact: nupkgs-windows
-          - os: windows-latest
-          - iod: false
+          - os: ubuntu-latest
             maui-workload: maui-android
             artifact: nupkgs-android
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v9
+      - uses: actions/checkout@v7
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v7
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: |
-            10.4.x
+            10.0.x
 
       # No Xcode pin and no manifest pin, for the reasons ci.yml gives at length:
       # both were written when the image topped out below the SDK the
@@ -86,7 +84,7 @@ jobs:
   merge-and-push:
     name: Merge${{ inputs.push && ' + push' || ' (dry run)' }}
     needs: pack
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
       # Write, only so a successful publish can leave a tag behind.
       contents: write
@@ -97,12 +95,12 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: |
-            10.5.1
+            10.0.x
 
       - name: Set up Python
-        uses: actions/setup-python@v9
+        uses: actions/setup-python@v7
         with:
-          python-version: "3.15"
+          python-version: "3.x"
 
       # Both halves of the handoff are by name, which is the case the artifact
       # actions have kept stable across majors: the v5 path change applied to
