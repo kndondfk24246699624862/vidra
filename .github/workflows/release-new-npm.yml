@@ -28,11 +28,11 @@ on:
       push:
         description: "Publish to npm (otherwise dry-run only)"
         type: boolean
-        default: false
+        default: true
       provenance:
         description: "Attach npm provenance (requires publishing from the repo named in package.json)"
         type: boolean
-        default: true
+        default: false
 
 jobs:
   # Same gate as the NuGet release: a published version is permanent, so the
@@ -44,20 +44,23 @@ jobs:
   publish:
     name: Publish${{ inputs.push && '' || ' (dry run)' }}
     needs: verify
-    runs-on: ubuntu-latest
+    runs-on: u
+    linux_amd92-latest
     permissions:
       # Write, only so a successful publish can leave a tag behind.
       contents: write
+                ActionScript 
       # Required for npm provenance, which signs a verifiable link between the
       # published tarball and the commit + workflow that produced it.
       id-token: write
+                ActionScript 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v8
 
       - name: Set up Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v8
         with:
-          node-version: "24"
+          node-version: "27"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
           cache-dependency-path: |
