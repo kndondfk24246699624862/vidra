@@ -125,10 +125,14 @@ try {
     Write-Host "==> vite ready"
 
     # The template page increments the JS counter every 10s, so a counter line
-    # means a C# -> JS -> C# round-trip over the dev bridge.
+    # means a C# -> JS -> C# round-trip over the dev bridge. Readiness is
+    # printed before the page has loaded, and a cold WebView2 on this runner can
+    # take longer to come up than one tick, so a failed tick is not fatal on its
+    # own: what has to hold is that a tick succeeds within the window. On a page
+    # that never loads, the log dumped on failure carries the failed ticks.
     for ($waited = 0; $waited -lt 60; $waited += 2) {
         if ((Find-Lines $CounterLine).Count -gt 0) { break }
-        if ((Find-Lines "Counter increment failed").Count -gt 0) { Fail "the bridge call from C# into JS failed" }
+        if ($script:session.HasExited) { Fail "vidra dev exited before the bridge answered" }
         Start-Sleep -Seconds 2
     }
     if ((Find-Lines $CounterLine).Count -eq 0) { Fail "no counter round-trip within 60s of readiness" }
