@@ -164,8 +164,8 @@ const main = async (): Promise<void> => {
   // so the two installs are independent and run concurrently.
   const uiDir = path.join(root, "ui");
   const [rootNpmOk, uiNpmOk] = await Promise.all([
-    tryExecAsync("npm", ["install"], root),
-    tryExecAsync("npm", ["install"], uiDir),
+    tryExecAsync("npm install", root),
+    tryExecAsync("npm install", uiDir),
   ]);
   const npmOk = rootNpmOk && uiNpmOk;
 
