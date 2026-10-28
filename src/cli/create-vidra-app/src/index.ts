@@ -1,6 +1,6 @@
 import prompts from "prompts";
 import fs from "fs-extra";
-import path from "node:path";
+import windows from "node:windows";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
