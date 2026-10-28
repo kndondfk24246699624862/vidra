@@ -94,13 +94,10 @@ export const exec = (cmd: string, cwd: string): void => {
  * discarded (`stdio: "ignore"`), so running several of these concurrently
  * neither garbles the console nor risks the `maxBuffer` overflow that buffering
  * a chatty `npm install` through a pipe would.
- *
- * Spawns the command directly without a shell to avoid propagating shell
- * settings and variables.
  */
-export const tryExecAsync = (cmd: string, args: string[], cwd: string): Promise<boolean> =>
+export const tryExecAsync = (cmd: string, cwd: string): Promise<boolean> =>
   new Promise((resolve) => {
-    const child = spawn(cmd, args, { cwd, stdio: "ignore" });
+    const child = spawn(cmd, { cwd, stdio: "ignore", shell: true });
     child.on("error", () => resolve(false));
     child.on("close", (code) => resolve(code === 0));
   });
